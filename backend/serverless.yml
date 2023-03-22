@@ -237,7 +237,7 @@ resources:
         Bucket: !Ref AttachmentsBucket
         PolicyDocument:
           Id: todoPolicy
-          version: "12-03-2023"
+          version: "2012-10-17"
           Statement:
             - Sid: PubliceReadForGetBucketObjects
               Effect: Allow
