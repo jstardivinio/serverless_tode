@@ -1,4 +1,4 @@
-import { setAttachmentUrl } from '../dataLayer/todosAcess'
+import { setAttachmentUrl, getTodosByUser, createTodo as createATodo, updateTodo as updateATodo, deleteTodo as deleteATodo  } from '../dataLayer/todosAcess'
 import { generateUploadUrl } from '../fileStorage/attachmentUtils';
 import { TodoItem } from '../models/TodoItem'
 import { CreateTodoRequest } from '../requests/CreateTodoRequest'
@@ -10,13 +10,11 @@ import * as createError from 'http-errors'
 // TODO: Implement businessLogic
 const logger = createLogger('todos')
 
-const todosAccess = new TodosAccess()
-
 //Retrieve a list of todos for a user
 export async function getTodosForUser(userId: string): Promise<TodoItem[]> {
   logger.info(`Retrieving all todos for the user with ID ${userId}`)
 
-  return await todosAccess.getTodosByUser(userId)
+  return await getTodosByUser(userId)
 }
 
 //Create a new todo
@@ -31,7 +29,7 @@ export async function createTodo(userId: string, createTodoRequest: CreateTodoRe
       ...createTodoRequest
     }
     
-    await todosAccess.createTodo(todo)
+    await createATodo(todo)
 
     logger.info(`New todo Created`)
   
@@ -42,7 +40,7 @@ export async function createTodo(userId: string, createTodoRequest: CreateTodoRe
   export async function updateTodo(todoId: string, userId: string,  updateTodoRequest: UpdateTodoRequest) {
     logger.info(`Updating the todo with ID ${todoId}`)
   
-    todosAccess.updateTodo(todoId, userId, updateTodoRequest)
+    updateATodo(todoId, userId, updateTodoRequest)
 
     logger.info(`Successfully updated TODO`)
   }
@@ -52,7 +50,7 @@ export async function createTodo(userId: string, createTodoRequest: CreateTodoRe
   export async function deleteTodo(todoId: string, userId: string) {
     logger.info('Deleting a todo')
 
-    todosAccess.deleteTodo(todoId, userId)
+    deleteATodo(todoId, userId)
   }
 
   //Create an upload URL for a TOdo attachment
