@@ -27,7 +27,7 @@ provider:
     TODOS_TABLE: Todos-${self:provider.stage}
     TODOS_CREATED_AT_INDEX: CreatedAtIndex
     TODOS_TODO_ID_INDEX: TodoIdIndex
-    ATTACHMENT_S3_BUCKET: serverless-c4-todo-images-${self:provider.stage}
+    ATTACHMENT_S3_BUCKET: cj-todo-images-store-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
 
   logs:
@@ -61,6 +61,9 @@ functions:
   Auth:
     handler: src/lambda/auth/auth0Authorizer.handler
 
+  # TODO: Configure this function - 
+  # Provide iamRoleStatements property for performing Actions on DynamoDB
+
   #Retrieve Todos
   GetTodos:
     handler: src/lambda/http/getTodos.handler
@@ -73,9 +76,20 @@ functions:
     iamRoleStatements:
       - Effect: Allow
         Action: 
-          - DynamoDB:Query
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
-  
+          - dynamodb:GetItem
+          - dynamoDB:Query
+        Resource: [
+        "arn:aws:dynamodb:*:*:table/${self:provider.environment.TODOS_TABLE}",
+        "arn:aws:dynamodb:*:*:table/${self:provider.environment.TODOS_TABLE}/index/*"
+        ]
+          
+
+        
+  # TODO: Configure this function - 
+  # Provide iamRoleStatements property. Decide the Actions and AWS Resource. 
+  # To refer to an AWS resource defined in the "Resources" section, you can use "Resource: !GetAtt <resource-name>.Arn"
+  # To validate incoming HTTP requests, we have provided the request schemas in function definition below. 
+
   #Create a todo
   CreateTodo:
     handler: src/lambda/http/createTodo.handler
@@ -98,7 +112,8 @@ functions:
       - Effect: Allow
         Action: 
           - DynamoDB:PutItem
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+        Resource: !GetAtt TodosTable.Arn
+
 
   #Update a TODO
   UpdateTodo:
@@ -123,7 +138,8 @@ functions:
         Action: 
           - dynamodb:GetItem
           - dynamoDB:UpdateItem
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+        Resource: !GetAtt TodosTable.Arn
+
 
   #Delete a todo
   DeleteTodo:
@@ -139,7 +155,7 @@ functions:
         Action: 
           - dynamodb:GetItem
           - dynamoDB:DeleteItem
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+        Resource: !GetAtt TodosTable.Arn
 
   #Generate the file upload URL
   GenerateUploadUrl:
@@ -159,7 +175,7 @@ functions:
       - Effect: Allow
         Action:
           - s3:PutObject
-        Resource: arn:aws:s3:::${self:provider.environment.ATTACHMENT_S3_BUCKET}/*
+        Resource: !GetAtt AttachmentsBucket.Arn
       
 
 resources:
@@ -170,7 +186,7 @@ resources:
         ResponseParameters:
           gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
           gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-          gatewayresponse.header.Access-Control-Allow-Methods: "'GET,OPTIONS,POST'"
+          gatewayresponse.header.Access-Control-Allow-Methods: "'GET,OPTIONS,POST,PUT,DELETE'"
         ResponseType: DEFAULT_4XX
         RestApiId:
           Ref: ApiGatewayRestApi
@@ -180,8 +196,6 @@ resources:
       Properties:
         AttributeDefinitions:
           - AttributeName: userId
-            AttributeType: S
-          - AttributeName: todoId
             AttributeType: S
           - AttributeName: createdAt
             AttributeType: S
@@ -234,10 +248,10 @@ resources:
       Properties:
         Bucket: !Ref AttachmentsBucket
         PolicyDocument:
-          Id: todoPolicy
-          version: "2012-10-17"
+          Id: MyPolicy
+          Version: "2012-10-17"
           Statement:
-            - Sid: PubliceReadForGetBucketObjects
+            - Sid: PublicReadForGetBucketObjects
               Effect: Allow
               Principal: "*"
               Action: 's3:GetObject'

@@ -19,9 +19,6 @@ export const handler = middy(
       return {
         
         statusCode: 404,
-        headers: {
-          'Access-Control-Allow-Origin': '*'
-        },
         body: JSON.stringify({
           error: 'Todo does not exist for this user'
         })

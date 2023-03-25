@@ -10,7 +10,7 @@ const AWSXRay = require('aws-xray-sdk')
 const XAWS = AWSXRay.captureAWS(AWS)
 const docClient: DocumentClient = new XAWS.DynamoDB.DocumentClient()
 const todoTableName = process.env.TODOS_TABLE
-const todoIndexName = process.env.TODOS_TODO_ID_INDEX
+//const todoIndexName = process.env.TODOS_TODO_ID_INDEX
 
 
 const logger = createLogger('TodosAccess')
@@ -22,11 +22,12 @@ export async function getTodosByUser(userId: string): Promise<TodoItem[]> {
 
     const result = await docClient.query({
       TableName: todoTableName,
-      IndexName: todoIndexName,
+      //IndexName: todoIndexName,
       KeyConditionExpression: 'userId = :userId',
       ExpressionAttributeValues: {
         ':userId': userId
-      }
+      },
+      ScanIndexForward: false
     }).promise()
 
     const todos = result.Items
@@ -37,16 +38,16 @@ export async function getTodosByUser(userId: string): Promise<TodoItem[]> {
   //Add a todo in DB
   export async function createTodo(todo: TodoItem) {
 
-    await this.docClient.put({
-      TableName: this.todoTableName,
+    await docClient.put({
+      TableName: todoTableName,
       Item: todo,
     }).promise()
   }
 
   //Update the fields of a todo
   export async function updateTodo(todoId: string, userId: string, updateTodoRequest: UpdateTodoRequest): Promise<void> {
-    await this.docClient.update({
-      TableName: this.todoTable,
+    await docClient.update({
+      TableName: todoTableName,
       Key: {
         "userId": userId,
         "todoId": todoId
@@ -61,10 +62,10 @@ export async function getTodosByUser(userId: string): Promise<TodoItem[]> {
   }
 
   export async function deleteTodo(todoId: string, userId) {
-    logger.info(`Deleting todo item ${todoId} from ${this.todosTable}`)
+    logger.info(`Deleting todo item ${todoId} from ${todoTableName}`)
 
-    await this.docClient.delete({
-        TableName: this.todoTable,
+    await docClient.delete({
+        TableName: todoTableName,
         Key: {
           "userId": userId,
           "todoId": todoId
@@ -75,7 +76,7 @@ export async function getTodosByUser(userId: string): Promise<TodoItem[]> {
 
 
 export async function setAttachmentUrl(todoId: string, userId: string, attachmentUrl: string) {
-    await this.docClient.update({
+    await docClient.update({
       TableName: todoTableName,
       Key: {
         "userId": userId,
