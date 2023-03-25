@@ -1,4 +1,4 @@
-org: strive
+org: cjordan
 app: serverless-todo-app
 service: serverless-todo-app
 
@@ -34,9 +34,7 @@ provider:
     # Enable API Gateway logs
     restApi: true
 
-  iam:
-    role:
-      statements:
+  iamRoleStatements:
         - Effect: Allow
           Action:
             - xray:PutTelemetryRecords
@@ -151,7 +149,7 @@ functions:
           method: post
           path: todos/{todoId}/attachment
           cors: true
-          auth: Auth
+          authorizer: Auth
     iamRoleStatements:
       - Effect: Allow
         Action:
@@ -161,7 +159,7 @@ functions:
       - Effect: Allow
         Action:
           - s3:PutObject
-        Resource: arn:aws:s3:::${self:provider.environment.ATTACHMENTS_S3_BUCKET}/*
+        Resource: arn:aws:s3:::${self:provider.environment.ATTACHMENT_S3_BUCKET}/*
       
 
 resources:

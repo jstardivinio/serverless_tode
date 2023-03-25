@@ -5,10 +5,12 @@ import { CreateTodoRequest } from '../requests/CreateTodoRequest'
 import { UpdateTodoRequest } from '../requests/UpdateTodoRequest'
 import { createLogger } from '../utils/logger'
 import * as uuid from 'uuid'
-import * as createError from 'http-errors'
+//import * as createError from 'http-errors'
 
 // TODO: Implement businessLogic
 const logger = createLogger('todos')
+const bucketName = process.env.ATTACHMENT_S3_BUCKET
+
 
 //Retrieve a list of todos for a user
 export async function getTodosForUser(userId: string): Promise<TodoItem[]> {
