@@ -86,6 +86,7 @@ function getToken(authHeader: string): string {
 
   const split = authHeader.split(' ')
   const token = split[1]
+  logger.info(`This is the token ${token}`)
 
   return token
 }

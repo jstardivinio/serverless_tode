@@ -22,7 +22,6 @@ export async function getTodosByUser(userId: string): Promise<TodoItem[]> {
 
     const result = await docClient.query({
       TableName: todoTableName,
-      //IndexName: todoIndexName,
       KeyConditionExpression: 'userId = :userId',
       ExpressionAttributeValues: {
         ':userId': userId
@@ -57,17 +56,20 @@ export async function getTodosByUser(userId: string): Promise<TodoItem[]> {
           ":name": updateTodoRequest.name,
           ":dueDate": updateTodoRequest.dueDate,
           ":done": updateTodoRequest.done
+      },
+      ExpressionAttributeNames: {
+        "#name": "name"
       }
     }).promise()
   }
 
-  export async function deleteTodo(todoId: string, userId) {
-    logger.info(`Deleting todo item ${todoId} from ${todoTableName}`)
+  export async function deleteTodo(todoId: string, userId: string) {
+    logger.info(`Deleting todo with  ID: ${todoId}`)
 
     await docClient.delete({
         TableName: todoTableName,
         Key: {
-          "userId": userId,
+          "userId" : userId,
           "todoId": todoId
         }
       }).promise()

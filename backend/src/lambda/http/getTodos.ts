@@ -15,7 +15,7 @@ export const handler = middy(
 
     const todos = await getTodosForUser(userId)
 
-    if (!todos)
+    if (!todos || todos.length == 0)
       return {
         
         statusCode: 404,
@@ -29,7 +29,7 @@ export const handler = middy(
       
       statusCode: 200,
       body: JSON.stringify({
-        todos
+        items: todos
       })
     }
   }

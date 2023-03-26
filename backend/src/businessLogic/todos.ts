@@ -66,7 +66,7 @@ export async function createTodo(userId: string, createTodoRequest: CreateTodoRe
     logger.info('TODO Upload Url Created')
 
 
-    await setAttachmentUrl(todoId, userId,  attachmentUrl)//
+    await setAttachmentUrl(todoId, userId, attachmentUrl)//
     logger.info('ToDO attachment URL updated')
 
     return uploadUrl
