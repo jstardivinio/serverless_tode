@@ -15,7 +15,7 @@ export const handler = middy(
 
     const todos = await getTodosForUser(userId)
 
-    if (!todos || todos.length == 0)
+    if (!todos)
       return {
         
         statusCode: 404,
